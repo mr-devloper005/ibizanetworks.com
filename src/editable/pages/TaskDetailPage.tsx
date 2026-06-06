@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Bookmark, Building2, Camera, CheckCircle2, Download, ExternalLink, FileText, Globe2, Mail, MapPin, MessageCircle, Phone, Tag, UserRound } from 'lucide-react'
+import { ArrowLeft, Bookmark, Building2, Camera, CheckCircle2, Download, ExternalLink, FileText, Globe2, Mail, MapPin, MessageCircle, Phone, Star, Tag, UserRound } from 'lucide-react'
 import { buildPostMetadata, buildTaskMetadata } from '@/lib/seo'
 import { buildPostUrl, fetchArticleComments, fetchTaskPostBySlug, fetchTaskPosts } from '@/lib/task-data'
 import { getTaskConfig, SITE_CONFIG, type TaskKey } from '@/lib/site-config'
@@ -157,28 +157,64 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
   const email = getField(post, ['email'])
   const website = getField(post, ['website', 'url'])
   const mapSrc = mapSrcFor(post)
+  const category = categoryOf(post, 'Business')
+  const directionsHref = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : '#'
   return (
-    <section className="mx-auto max-w-[var(--editable-container)] px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+    <section className="mx-auto max-w-[var(--editable-container)] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       <BackLink task="listing" />
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <article className="rounded-[2.8rem] border border-[var(--editable-border)] bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.09)] sm:p-9">
-          <div className="grid gap-6 sm:grid-cols-[150px_1fr]">
-            <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-[2rem] bg-[var(--detail-bg)] ring-1 ring-[var(--editable-border)]">
-              {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-14 w-14 opacity-40" />}
+      <div className="mt-6 rounded-lg bg-[var(--slot4-panel-bg)] p-6 sm:p-8">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_180px] md:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--detail-accent)]">{category}</p>
+            <h1 className="mt-3 text-4xl font-black leading-[1.02] tracking-[-0.05em] sm:text-6xl">{post.title}</h1>
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm font-bold">
+              <span className="inline-flex items-center gap-1">5.0 <Star className="h-4 w-4 fill-[var(--detail-accent)] text-[var(--detail-accent)]" /> Total Reviews: 2</span>
+              {address ? <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 text-[var(--detail-accent)]" /> {address}</span> : null}
             </div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--detail-accent)]">Business listing</p>
-              <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.07em] sm:text-6xl">{post.title}</h1>
-              <p className="mt-5 max-w-3xl text-base leading-8 opacity-70">{summaryText(post)}</p>
-            </div>
+            {phone ? <p className="mt-4 text-3xl font-black tracking-[-0.04em]">{phone}</p> : null}
           </div>
-          <InfoGrid items={[['Location', address, MapPin], ['Phone', phone, Phone], ['Email', email, Mail], ['Website', website, Globe2]]} />
-          <BodyContent post={post} />
-          <ImageStrip images={images.slice(1)} label="Business showcase" />
+          <div className="flex h-36 w-36 items-center justify-center justify-self-start overflow-hidden rounded-lg bg-white ring-1 ring-[var(--editable-border)] md:justify-self-end">
+            {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-14 w-14 opacity-40" />}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <article className="rounded-lg border border-[var(--editable-border)] bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.09)] sm:p-8">
+          <div className="flex flex-wrap gap-3">
+            {phone ? <a href={`tel:${phone}`} className="rounded-full bg-[var(--slot4-dark-bg)] px-5 py-3 text-sm font-black text-white">Call business</a> : null}
+            {website ? <Link href={website} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--slot4-accent-fill)] px-5 py-3 text-sm font-black text-white">Website</Link> : null}
+            {address ? <Link href={directionsHref} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--editable-border)] px-5 py-3 text-sm font-black">Map & Directions</Link> : null}
+            <Link href="/contact" className="rounded-full border border-[var(--editable-border)] px-5 py-3 text-sm font-black">Write a review</Link>
+            <Link href="/contact" className="rounded-full border border-red-500 px-5 py-3 text-sm font-black text-red-600">Report Closed</Link>
+          </div>
+
+          <ImageStrip images={images.slice(1)} label="Photos and videos" />
+          
+          <section className="mt-8 border-t border-[var(--editable-border)] pt-7">
+            <h2 className="text-2xl font-black tracking-[-0.04em]">Products and Services</h2>
+            <BodyContent post={post} compact />
+          </section>
+          <section className="mt-8 border-t border-[var(--editable-border)] pt-7">
+            <h2 className="text-2xl font-black tracking-[-0.04em]">Areas Served</h2>
+            <p className="mt-4 text-base font-semibold leading-8 text-[var(--slot4-muted-text)]">{address || 'Local and nearby service areas.'}</p>
+          </section>
+          <section className="mt-8 border-t border-[var(--editable-border)] pt-7">
+            <h2 className="text-2xl font-black tracking-[-0.04em]">Business details</h2>
+            <InfoGrid items={[['Location', address, MapPin], ['Phone', phone, Phone], ['Email', email, Mail], ['Website', website, Globe2]]} />
+          </section>
         </article>
         <aside className="space-y-5">
+          <div className="rounded-lg border border-[var(--editable-border)] bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-black tracking-[-0.03em]">Contact information</h2>
+            <div className="mt-4 divide-y divide-[var(--editable-border)] text-sm font-semibold">
+              {phone ? <a href={`tel:${phone}`} className="flex items-center justify-between gap-3 py-4"><span>{phone}</span><Phone className="h-4 w-4 opacity-45" /></a> : null}
+              {address ? <Link href={directionsHref} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 py-4"><span>{address}</span><MapPin className="h-4 w-4 opacity-45" /></Link> : null}
+              {website ? <Link href={website} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 py-4"><span>Website</span><ExternalLink className="h-4 w-4 opacity-45" /></Link> : null}
+              <span className="flex items-center justify-between gap-3 py-4"><span>Today: Open during listed hours</span><CheckCircle2 className="h-4 w-4 opacity-45" /></span>
+            </div>
+          </div>
           {mapSrc ? <MapBox src={mapSrc} label={address || post.title} /> : <ContactAction website={website} phone={phone} email={email} />}
-          {mapSrc ? <ContactAction website={website} phone={phone} email={email} /> : null}
           <RelatedPanel task="listing" post={post} related={related} compact />
         </aside>
       </div>
@@ -385,7 +421,6 @@ function RelatedPanel({ task, post, related, compact = false }: { task: TaskKey;
           <div className="mt-4 grid gap-3 text-sm font-bold opacity-75">
             <p className="inline-flex items-center gap-2"><Tag className="h-4 w-4" /> Task: {taskConfig?.label || task}</p>
             <p className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Site: {SITE_CONFIG.name}</p>
-            {post.publishedAt ? <p>Published: {new Date(post.publishedAt).toLocaleDateString()}</p> : null}
           </div>
         </div>
       ) : null}
