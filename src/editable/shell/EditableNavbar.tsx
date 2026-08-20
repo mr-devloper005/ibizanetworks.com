@@ -1,90 +1,128 @@
 'use client'
 
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Search, UserPlus, LogIn, X, PlusCircle } from 'lucide-react'
+import { Menu, Search, UserPlus, LogIn, X, PlusCircle, ChevronRight } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { globalContent } from '@/editable/content/global.content'
-import { getVisualPreset, visualSystem } from '@/editable/theme/visual-system'
 import { useEditableLocalAuthSession } from '@/editable/components/EditableLocalAuthForms'
 import { slot4BrandConfig } from '@/editable/theme/brand.config'
 
 export function EditableNavbar() {
-  const preset = getVisualPreset(visualSystem.recommendedPreset as any)
   const [open, setOpen] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
   const pathname = usePathname()
   const { session, logout } = useEditableLocalAuthSession()
-  const navVars = { '--editable-nav-bg': '#ffffff', '--editable-nav-text': '#090a2b', '--editable-nav-active': '#e9f5ff', '--editable-nav-active-text': '#090a2b', '--editable-cta-bg': '#07072d', '--editable-cta-text': '#ffffff', '--editable-search-bg': '#ffffff', '--editable-border': 'rgba(9,10,43,0.12)', '--editable-container': '1296px' } as CSSProperties
-  const navItems = useMemo(
-    () => SITE_CONFIG.tasks.filter((task) => task.enabled).map((task) => ({ label: task.label, href: task.route })),
-    []
-  )
+
+  const navLinks = useMemo(() => {
+    const taskLinks = SITE_CONFIG.tasks.filter((t) => t.enabled).map((t) => ({ label: t.label, href: t.route }))
+    const configured = globalContent.nav?.primaryLinks || []
+    const merged = configured.length ? configured : [{ label: 'Home', href: '/' }, ...taskLinks]
+    return merged.slice(0, 5)
+  }, [])
+
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
 
   return (
-    <header style={navVars} className="sticky top-0 z-50 border-b border-[var(--editable-border)] bg-[var(--editable-nav-bg)]/94 text-[var(--editable-nav-text)] backdrop-blur-xl">
-      <nav className="mx-auto flex min-h-[78px] w-full max-w-[var(--editable-container)] items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex shrink-0 items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-[var(--editable-border)] bg-white shadow-sm transition-transform group-hover:-rotate-2">
-            <img src="/favicon.png?v=20260413" alt={slot4BrandConfig.siteName} className="h-18 w-13 object-contain" />
-          </span>
-          <span className="hidden min-w-0 sm:block">
-            <span className="block max-w-[180px] truncate text-sm font-black tracking-[-0.03em]">{slot4BrandConfig.siteName}</span>
-            <span className="block max-w-[180px] truncate text-[11px] font-bold uppercase tracking-[0.18em] opacity-55">{globalContent.nav?.tagline || SITE_CONFIG.tagline}</span>
-          </span>
-        </Link>
+    <header className="sticky top-0 z-50 bg-[var(--slot4-surface-bg)]/92 backdrop-blur-2xl">
+      <div className="mx-auto max-w-[var(--editable-container)] px-4 sm:px-6 lg:px-8">
+        <nav className="flex h-16 items-center gap-3 lg:h-[72px]">
+          <Link href="/" className="group flex shrink-0 items-center gap-2.5">
+            <img src="/favicon.png?v=20260413" alt={slot4BrandConfig.siteName} className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-110" />
+            <span className="hidden text-lg font-black tracking-[-0.04em] text-[var(--slot4-page-text)] sm:block">{slot4BrandConfig.siteName}</span>
+          </Link>
 
-        <form action="/search" className="mx-auto hidden min-w-0 flex-1 justify-center md:flex">
-          <label className="relative flex w-full max-w-xl items-center overflow-hidden rounded-lg border border-[var(--editable-border)] bg-[var(--editable-search-bg)] shadow-sm">
-            <Search className="h-4 w-4 opacity-55" />
-            <input name="q" type="search" placeholder="Find a business" className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm font-semibold outline-none placeholder:text-current/45" />
-            
-            <button className="flex h-12 w-14 items-center justify-center bg-[var(--slot4-accent-fill)] text-white" aria-label="Search"><Search className="h-5 w-5" /></button>
-          </label>
-        </form>
-
-        <div className="hidden items-center gap-2 lg:flex">
-          {navItems.slice(0, 4).map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
-            return (
-              <Link key={item.href} href={item.href} className={`rounded-full px-4 py-2 text-sm font-black transition ${active ? 'bg-[var(--editable-nav-active)] text-[var(--editable-nav-active-text)]' : 'hover:bg-black/5'}`}>
+          <div className="hidden items-center gap-1 lg:flex">
+            {navLinks.map((item) => (
+              <Link key={item.href} href={item.href} className={`relative px-3.5 py-2 text-[13px] font-bold tracking-[-0.01em] transition-colors ${isActive(item.href) ? 'text-[var(--slot4-page-text)]' : 'text-[var(--slot4-muted-text)] hover:text-[var(--slot4-page-text)]'}`}>
                 {item.label}
-              </Link>
-            )
-          })}
-        </div>
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          {session ? (
-            <>
-              <span className="hidden max-w-[160px] truncate rounded-full bg-[var(--editable-nav-active)] px-4 py-2 text-sm font-black sm:inline-flex">{session.name}</span>
-              <Link href="/create" className="hidden items-center gap-2 rounded-full bg-[var(--editable-cta-bg)] px-4 py-2.5 text-sm font-black text-[var(--editable-cta-text)] shadow-sm sm:inline-flex"><PlusCircle className="h-4 w-4" /> Add listing</Link>
-              <button type="button" onClick={logout} className="hidden items-center gap-2 rounded-full border border-[var(--editable-border)] px-3 py-2 text-sm font-black hover:bg-black/5 sm:inline-flex">Logout</button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-black hover:bg-black/5 sm:inline-flex"><LogIn className="h-4 w-4" /> Login</Link>
-              <Link href="/signup" className="hidden items-center gap-2 rounded-full bg-[var(--editable-cta-bg)] px-4 py-2.5 text-sm font-black text-[var(--editable-cta-text)] shadow-sm sm:inline-flex"><UserPlus className="h-4 w-4" /> Free Business Listing</Link>
-            </>
-          )}
-          <button type="button" onClick={() => setOpen((value) => !value)} className="rounded-full border border-[var(--editable-border)] bg-white p-2 lg:hidden" aria-label="Toggle menu">
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-      </nav>
-
-      {open ? (
-        <div className="border-t border-[var(--editable-border)] bg-[var(--editable-nav-bg)] px-4 py-4 lg:hidden">
-          <form action="/search" className="mb-4 flex rounded-2xl border border-[var(--editable-border)] bg-[var(--editable-search-bg)] px-3 py-2">
-            <Search className="mt-1 h-4 w-4 opacity-55" />
-            <input name="q" type="search" placeholder="Find a business" className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none" />
-          </form>
-          <div className="grid gap-2">
-            {[{ label: 'Home', href: '/' }, ...navItems, { label: 'Contact', href: '/contact' }, ...(session ? [{ label: 'Create', href: '/create' }] : [{ label: 'Login', href: '/login' }, { label: 'Sign up', href: '/signup' }])].map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="rounded-2xl border border-[var(--editable-border)] bg-white px-4 py-3 text-sm font-black">
-                {item.label}
+                {isActive(item.href) ? <span className="absolute inset-x-2 -bottom-[1px] h-0.5 rounded-full bg-[var(--slot4-accent-fill)]" /> : null}
               </Link>
             ))}
+          </div>
+
+          <form action="/search" className="mx-auto hidden min-w-0 flex-1 md:flex md:max-w-md lg:max-w-lg">
+            <label className={`flex w-full items-center gap-2 rounded-full border bg-[var(--slot4-page-bg)] px-4 py-2 transition-all duration-200 ${searchFocused ? 'border-[var(--slot4-accent-fill)] shadow-[0_0_0_3px_var(--slot4-accent-soft)]' : 'border-[var(--editable-border)]'}`}>
+              <Search className="h-4 w-4 shrink-0 text-[var(--slot4-soft-muted-text)]" />
+              <input
+                name="q"
+                type="search"
+                placeholder="Search businesses, services, locations..."
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[var(--slot4-page-text)] outline-none placeholder:text-[var(--slot4-soft-muted-text)]"
+              />
+              <button type="submit" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--slot4-accent-fill)] text-white transition hover:opacity-90" aria-label="Search">
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </label>
+          </form>
+
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {session ? (
+              <>
+                <span className="hidden max-w-[140px] truncate rounded-full bg-[var(--slot4-panel-bg)] px-3.5 py-1.5 text-xs font-bold text-[var(--slot4-page-text)] sm:inline-flex">{session.name}</span>
+                <Link href="/create" className="hidden items-center gap-1.5 rounded-full bg-[var(--slot4-accent-fill)] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:opacity-90 sm:inline-flex">
+                  <PlusCircle className="h-3.5 w-3.5" /> Add Listing
+                </Link>
+                <button type="button" onClick={logout} className="hidden rounded-full border border-[var(--editable-border)] px-3 py-1.5 text-xs font-bold text-[var(--slot4-muted-text)] transition hover:bg-[var(--slot4-panel-bg)] sm:inline-flex">Logout</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-[var(--slot4-muted-text)] transition hover:text-[var(--slot4-page-text)] sm:inline-flex">
+                  <LogIn className="h-3.5 w-3.5" /> Login
+                </Link>
+                <Link href="/signup" className="hidden items-center gap-1.5 rounded-full bg-[var(--slot4-dark-bg)] px-4 py-2 text-sm font-bold text-[var(--slot4-dark-text)] shadow-sm transition hover:opacity-90 sm:inline-flex">
+                  <UserPlus className="h-3.5 w-3.5" /> Sign Up Free
+                </Link>
+              </>
+            )}
+            <button type="button" onClick={() => setOpen((v) => !v)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--editable-border)] text-[var(--slot4-page-text)] transition hover:bg-[var(--slot4-panel-bg)] lg:hidden" aria-label="Toggle menu">
+              {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-[var(--editable-border)] to-transparent" />
+
+      {open ? (
+        <div className="border-t border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] lg:hidden">
+          <div className="mx-auto max-w-[var(--editable-container)] px-4 py-4 sm:px-6">
+            <form action="/search" className="flex items-center gap-2 rounded-xl border border-[var(--editable-border)] bg-[var(--slot4-page-bg)] px-3 py-2.5">
+              <Search className="h-4 w-4 shrink-0 text-[var(--slot4-soft-muted-text)]" />
+              <input name="q" type="search" placeholder="Search businesses..." className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-[var(--slot4-soft-muted-text)]" />
+            </form>
+
+            <div className="mt-3 grid gap-1">
+              {[{ label: 'Home', href: '/' }, ...navLinks.filter((l) => l.href !== '/'), { label: 'About', href: '/about' }, { label: 'Contact', href: '/contact' }].map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-bold transition ${isActive(item.href) ? 'bg-[var(--slot4-panel-bg)] text-[var(--slot4-page-text)]' : 'text-[var(--slot4-muted-text)] hover:bg-[var(--slot4-panel-bg)]'}`}>
+                  {item.label}
+                  <ChevronRight className="h-3.5 w-3.5 opacity-40" />
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-3 grid gap-2 border-t border-[var(--editable-border)] pt-3">
+              {session ? (
+                <>
+                  <Link href="/create" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-lg bg-[var(--slot4-accent-fill)] py-2.5 text-sm font-bold text-white">
+                    <PlusCircle className="h-4 w-4" /> Add Listing
+                  </Link>
+                  <button type="button" onClick={() => { logout(); setOpen(false) }} className="rounded-lg border border-[var(--editable-border)] py-2.5 text-sm font-bold text-[var(--slot4-muted-text)]">Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link href="/signup" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-lg bg-[var(--slot4-dark-bg)] py-2.5 text-sm font-bold text-[var(--slot4-dark-text)]">
+                    <UserPlus className="h-4 w-4" /> Sign Up Free
+                  </Link>
+                  <Link href="/login" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-lg border border-[var(--editable-border)] py-2.5 text-sm font-bold text-[var(--slot4-muted-text)]">
+                    <LogIn className="h-4 w-4" /> Login
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       ) : null}

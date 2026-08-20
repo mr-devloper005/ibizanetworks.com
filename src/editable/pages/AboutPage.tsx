@@ -5,7 +5,7 @@ import { slot4BrandConfig } from '@/editable/theme/brand.config'
 export default function AboutPage() {
   return (
     <EditableSiteShell>
-      <main className="bg-[var(--editable-page-bg,#fffaf3)] px-4 py-14 text-[var(--editable-page-text,#241915)] sm:px-6 lg:px-8">
+      <main className="bg-[var(--slot4-page-bg)] px-4 py-14 text-[var(--slot4-page-text)] sm:px-6 lg:px-8">
         <section className="mx-auto grid max-w-[var(--editable-container)] gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <article className="rounded-lg border border-[var(--editable-border)] bg-white p-8 shadow-sm lg:p-12">
             <p className="text-xs font-black uppercase tracking-[0.24em] opacity-55">{pagesContent.about.badge}</p>
