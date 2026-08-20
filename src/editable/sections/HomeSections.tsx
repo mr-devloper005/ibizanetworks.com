@@ -37,17 +37,6 @@ const testimonials = [
   ['Triad Homes Real Estate', 'Everything important is finally in one place: service area, photos, details, and contact options.'],
 ]
 
-function getExcerpt(post?: SitePost | null, limit = 120) {
-  const content = post?.content && typeof post.content === 'object' ? post.content as Record<string, unknown> : {}
-  const raw =
-    (typeof content.description === 'string' && content.description) ||
-    (typeof content.summary === 'string' && content.summary) ||
-    post?.summary ||
-    ''
-  const clean = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-  return clean.length > limit ? `${clean.slice(0, limit).trim()}...` : clean
-}
-
 function taskLabel(task: TaskKey) {
   return SITE_CONFIG.tasks.find((item) => item.key === task)?.label || task
 }
@@ -97,7 +86,7 @@ function LearningCard({ title, body }: { title: string; body: string }) {
   )
 }
 
-export function EditableHomeHero({ primaryTask, primaryRoute }: HomeSectionProps) {
+export function EditableHomeHero({}: HomeSectionProps) {
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(164deg,#eaf4ff_0_58%,#ffffff_58%_100%)]">
       <div className="mx-auto grid max-w-[var(--editable-container)] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:px-8 lg:py-20">
@@ -180,7 +169,7 @@ export function EditableStoryRail({ primaryTask, primaryRoute, posts }: HomeSect
   )
 }
 
-export function EditableMagazineSplit({ primaryTask, primaryRoute, posts }: HomeSectionProps) {
+export function EditableMagazineSplit({}: HomeSectionProps) {
   return (
     <section className="bg-[var(--slot4-panel-bg)]">
       <div className="mx-auto max-w-[var(--editable-container)] px-4 py-16 sm:px-6 lg:px-8">
