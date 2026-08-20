@@ -12,12 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function SignupPage() {
   return (
     <EditableSiteShell>
-      <main className="bg-[#07072d] text-white">
+      <main className="bg-[var(--slot4-dark-bg)] text-[var(--slot4-dark-text)]">
         <section className="mx-auto grid min-h-[calc(100vh-12rem)] max-w-[var(--editable-container)] items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1fr] lg:px-8">
-          <div className="rounded-lg border border-white/10 bg-white p-6 text-[#090a2b] shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur sm:p-8">
+          <div className="rounded-lg border border-white/10 bg-[var(--slot4-surface-bg)] p-6 text-[var(--slot4-page-text)] shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur sm:p-8">
             <h1 className="text-3xl font-black tracking-[-0.05em]">{pagesContent.auth.signup.formTitle}</h1>
             <EditableLocalSignupForm />
-            <p className="mt-5 text-sm text-[#3f4960]">Already have an account? <Link href="/login" className="font-black text-[#090a2b] underline-offset-4 hover:underline">{pagesContent.auth.signup.loginCta}</Link></p>
+            <p className="mt-5 text-sm text-[var(--slot4-muted-text)]">Already have an account? <Link href="/login" className="font-black text-[var(--slot4-page-text)] underline-offset-4 hover:underline">{pagesContent.auth.signup.loginCta}</Link></p>
           </div>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.28em] text-white/60">{pagesContent.auth.signup.badge}</p>
